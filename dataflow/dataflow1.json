@@ -1,0 +1,79 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText1",
+						"type": "DatasetReference"
+					},
+					"name": "csvfile"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText2",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     startDate as string,",
+				"     endDate as string",
+				"}",
+				"source(output(",
+				"          message as string,",
+				"          tags as string,",
+				"          timestamp as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> csvfile",
+				"csvfile derive(datasetId = regexExtract(message, `^.*/explore/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}).*$`, 1),",
+				"          urlPath = regexExtract(message, `^.*GET (.*) HTTP.*$`, 1),",
+				"          type = iif(regexMatch(message, `^.*/explore/.*?download=true.*$`), 'DOWNLOAD', ''),",
+				"          date = toDate(timestamp, 'yyyy-M-dd')) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          message,",
+				"          tags,",
+				"          timestamp,",
+				"          datasetId,",
+				"          urlPath,",
+				"          type,",
+				"          date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 aggregate(groupBy(date,",
+				"          urlPath,",
+				"          type,",
+				"          datasetId),",
+				"     count = count()) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     filePattern:(concat($startDate, '-', $endDate, '.csv')),",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}

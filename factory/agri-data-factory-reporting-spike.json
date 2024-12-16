@@ -1,0 +1,9 @@
+{
+	"name": "agri-data-factory-reporting-spike",
+	"location": "uksouth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c0f298dc-ea37-47f5-9369-cdf32970d658",
+		"tenantId": "6ca596a5-7058-4494-965c-b808e7ab8057"
+	}
+}
