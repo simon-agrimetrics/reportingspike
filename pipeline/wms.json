@@ -161,6 +161,14 @@
 								"startDate": "@pipeline().parameters.startDate",
 								"endDate": "@pipeline().parameters.endDate"
 							}
+						},
+						"linkedServiceParameters": {
+							"csvfile": {
+								"schemaLinkedService": {
+									"startDate": "@pipeline().parameters.startDate",
+									"endDate": "@pipeline().parameters.endDate"
+								}
+							}
 						}
 					},
 					"compute": {
