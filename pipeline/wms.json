@@ -142,6 +142,16 @@
 					"dataflow": {
 						"referenceName": "wms_dataflow",
 						"type": "DataFlowReference",
+						"parameters": {
+							"startDate": {
+								"value": "'@{pipeline().parameters.startDate}'",
+								"type": "Expression"
+							},
+							"endDate": {
+								"value": "'@{pipeline().parameters.endDate}'",
+								"type": "Expression"
+							}
+						},
 						"datasetParameters": {
 							"csvfile": {
 								"startDate": "@pipeline().parameters.startDate",
