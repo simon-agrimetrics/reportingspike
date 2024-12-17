@@ -111,7 +111,11 @@
 				"outputs": [
 					{
 						"referenceName": "DelimitedText1",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"startDate": "@pipeline().parameters.startDate",
+							"endDate": "@pipeline().parameters.endDate"
+						}
 					}
 				]
 			},
@@ -146,6 +150,16 @@
 							"endDate": {
 								"value": "'@{pipeline().parameters.endDate}'",
 								"type": "Expression"
+							}
+						},
+						"datasetParameters": {
+							"csvfile": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
+							},
+							"sink1": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
 							}
 						}
 					},

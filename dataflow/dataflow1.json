@@ -67,7 +67,7 @@
 				"     count = count()) ~> aggregate1",
 				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     filePattern:(concat($startDate, '-', $endDate, '.csv')),",
+				"     filePattern:(concat('explore-dataset-', $startDate, '-', $endDate, '.csv')),",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
