@@ -1,9 +1,9 @@
 {
-	"name": "explore",
+	"name": "wms",
 	"properties": {
 		"activities": [
 			{
-				"name": "explore_copy",
+				"name": "wms_copy",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -110,7 +110,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "explore_extract",
+						"referenceName": "wms_extract",
 						"type": "DatasetReference",
 						"parameters": {
 							"startDate": "@pipeline().parameters.startDate",
@@ -120,11 +120,11 @@
 				]
 			},
 			{
-				"name": "explore_dataflow",
+				"name": "wms_dataflow",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
-						"activity": "explore_copy",
+						"activity": "wms_copy",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -140,18 +140,8 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "explore_dataflow",
+						"referenceName": "wms_dataflow",
 						"type": "DataFlowReference",
-						"parameters": {
-							"startDate": {
-								"value": "'@{pipeline().parameters.startDate}'",
-								"type": "Expression"
-							},
-							"endDate": {
-								"value": "'@{pipeline().parameters.endDate}'",
-								"type": "Expression"
-							}
-						},
 						"datasetParameters": {
 							"csvfile": {
 								"startDate": "@pipeline().parameters.startDate",
