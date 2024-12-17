@@ -1,0 +1,19 @@
+{
+	"name": "SourceDataset_erw_copy1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "elastic_live",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": "/filebeat-*/_search"
+			}
+		},
+		"schema": {}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
