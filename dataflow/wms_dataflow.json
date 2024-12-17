@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "explore_extract",
+						"referenceName": "wms_extract",
 						"type": "DatasetReference"
 					},
 					"name": "csvfile"
@@ -60,7 +60,7 @@
 				"filter1 aggregate(groupBy(date,",
 				"          urlPath),",
 				"     count = count()) ~> aggregate1",
-				"select1 filter(true()) ~> filter1",
+				"select1 filter(regexMatch(urlPath, `^/spatialdata/.*/wms[?]{1}.*$`)) ~> filter1",
 				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     filePattern:(concat('wms-', $startDate, '-', $endDate, '.csv')),",
