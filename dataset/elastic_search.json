@@ -1,5 +1,5 @@
 {
-	"name": "SourceDataset_erw_copy1",
+	"name": "elastic_search",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "elastic_live",

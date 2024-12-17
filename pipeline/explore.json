@@ -1,5 +1,5 @@
 {
-	"name": "CopyPipeline_erw",
+	"name": "explore",
 	"properties": {
 		"activities": [
 			{
@@ -104,13 +104,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SourceDataset_erw_copy1",
+						"referenceName": "elastic_search",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "DelimitedText1",
+						"referenceName": "explore_extract",
 						"type": "DatasetReference",
 						"parameters": {
 							"startDate": "@pipeline().parameters.startDate",
@@ -140,7 +140,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflow1",
+						"referenceName": "explore_dataflow",
 						"type": "DataFlowReference",
 						"parameters": {
 							"startDate": {

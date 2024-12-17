@@ -1,12 +1,12 @@
 {
-	"name": "dataflow1",
+	"name": "explore_dataflow",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedText1",
+						"referenceName": "explore_extract",
 						"type": "DatasetReference"
 					},
 					"name": "csvfile"
@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "DelimitedText2",
+						"referenceName": "explore_transform",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"

@@ -1,5 +1,5 @@
 {
-	"name": "DelimitedText2",
+	"name": "explore_transform",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
