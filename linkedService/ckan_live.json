@@ -1,0 +1,12 @@
+{
+	"name": "ckan_live",
+	"properties": {
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "http://ckan.agrimetrics.co.uk/api/3/action/package_show",
+			"enableServerCertificateValidation": false,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
