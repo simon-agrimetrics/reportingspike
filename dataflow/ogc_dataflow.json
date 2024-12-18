@@ -1,0 +1,70 @@
+{
+	"name": "ogc_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ogc_extract",
+						"type": "DatasetReference"
+					},
+					"name": "csvfile"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ogc_transform",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "filter1",
+					"description": "filter URLs matching the pattern"
+				},
+				{
+					"name": "derivedColumn2"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     startDate as string,",
+				"     endDate as string",
+				"}",
+				"source(output(",
+				"          message as string,",
+				"          tags as string,",
+				"          timestamp as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> csvfile",
+				"csvfile derive(url = regexExtract(message, `^.*GET (.*) HTTP.*$`, 1),",
+				"          date = toDate(timestamp, 'yyyy-M-dd')) ~> derivedColumn1",
+				"derivedColumn2 aggregate(groupBy(date,",
+				"          urlPath),",
+				"     count = count()) ~> aggregate1",
+				"derivedColumn1 filter(regexMatch(url, `^/spatialdata/.*/ogc/features/v1[?]{1}.*$`)) ~> filter1",
+				"filter1 derive(urlPath = regexExtract(url, `^(.*)[?]{1}.*$`, 1)) ~> derivedColumn2",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     filePattern:(concat('ogc-', $startDate, '-', $endDate, '.csv')),",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
