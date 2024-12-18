@@ -7,12 +7,10 @@
 		},
 		"parameters": {
 			"startDate": {
-				"type": "string",
-				"defaultValue": "@pipeline().parameters.startDate"
+				"type": "string"
 			},
 			"endDate": {
-				"type": "string",
-				"defaultValue": "@pipeline().parameters.endDate"
+				"type": "string"
 			}
 		},
 		"annotations": [],
