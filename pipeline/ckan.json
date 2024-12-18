@@ -1,0 +1,188 @@
+{
+	"name": "ckan",
+	"properties": {
+		"activities": [
+			{
+				"name": "ckan_copy",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "/filebeat-*/_search"
+					},
+					{
+						"name": "Destination",
+						"value": "report-data/dataset-view/@{pipeline().RunId}"
+					}
+				],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "POST",
+							"additionalHeaders": "Content-type: application/json",
+							"requestBody": {
+								"value": "{\n    \"size\": 10000,\n    \"query\": {\n        \"bool\": {\n            \"must\": [],\n            \"filter\": [\n                {\n                    \"bool\": {\n                        \"filter\": [\n                            {\n                                \"bool\": {\n                                    \"should\": [\n                                        {\n                                            \"term\": {\n                                                \"kubernetes.labels.app\": {\n                                                    \"value\": \"dsp-nginx-app\"\n                                                }\n                                            }\n                                        }\n                                    ],\n                                    \"minimum_should_match\": 1\n                                }\n                            },\n                            {\n                                \"bool\": {\n                                    \"should\": [\n                                        {\n                                            \"match_phrase\": {\n                                                \"message\": \"ckan\"\n                                            }\n                                        }\n                                    ],\n                                    \"minimum_should_match\": 1\n                                }\n                            }\n                        ]\n                    }\n                },\n                {\n                \"range\": {\n                    \"@timestamp\": {\n                    \"format\": \"strict_date_optional_time\",\n                    \"gte\": \"@{concat(pipeline().parameters.startDate, 'T00:00:00.000Z')}\",\n                    \"lte\": \"@{concat(pipeline().parameters.endDate, 'T23:59:59.999Z')}\"\n                    }\n                }\n            }\n            ],\n            \"should\": [],\n            \"must_not\": []\n        }\n    }\n}",
+								"type": "Expression"
+							},
+							"requestTimeout": ""
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings",
+							"copyBehavior": "FlattenHierarchy"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "AzureDataLakeStorage1",
+								"type": "LinkedServiceReference"
+							},
+							"path": "logs"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['_source']['message']"
+								},
+								"sink": {
+									"name": "message",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['_source']['tags']"
+								},
+								"sink": {
+									"name": "tags",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['_source']['@timestamp']"
+								},
+								"sink": {
+									"name": "timestamp",
+									"type": "DateTime"
+								}
+							}
+						],
+						"collectionReference": "$.hits.hits",
+						"mapComplexValuesToString": true
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "elastic_search",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ckan_extract",
+						"type": "DatasetReference",
+						"parameters": {
+							"startDate": "@pipeline().parameters.startDate",
+							"endDate": "@pipeline().parameters.endDate"
+						}
+					}
+				]
+			},
+			{
+				"name": "ckan_dataflow",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "ckan_copy",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "ckan_dataflow",
+						"type": "DataFlowReference",
+						"parameters": {
+							"startDate": {
+								"value": "'@{pipeline().parameters.startDate}'",
+								"type": "Expression"
+							},
+							"endDate": {
+								"value": "'@{pipeline().parameters.endDate}'",
+								"type": "Expression"
+							}
+						},
+						"datasetParameters": {
+							"csvfile": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
+							},
+							"sink1": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"parameters": {
+			"startDate": {
+				"type": "string",
+				"defaultValue": "2024-12-16"
+			},
+			"endDate": {
+				"type": "string",
+				"defaultValue": "2024-12-16"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-12-16T14:19:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
