@@ -1,0 +1,79 @@
+{
+	"name": "fileDownload_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "fileDownload_extract",
+						"type": "DatasetReference"
+					},
+					"name": "csvfile"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "fileDownload_transform",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     startDate as string,",
+				"     endDate as string",
+				"}",
+				"source(output(",
+				"          message as string,",
+				"          tags as string,",
+				"          timestamp as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> csvfile",
+				"csvfile derive(datasetId = regexExtract(message, `fileDataSetId=([a-fA-F0-9\\\\-]{36})`, 1),",
+				"          urlPath = regexExtract(message, `^.*GET (.*) HTTP.*$`, 1),",
+				"          fileName = regexExtract(message, `fileName=([^&\\s]+(?:%20[^&\\s]+)*)\\s*`, 1),",
+				"          date = toDate(timestamp, 'yyyy-M-dd')) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          message,",
+				"          tags,",
+				"          timestamp,",
+				"          datasetId,",
+				"          urlPath,",
+				"          fileName,",
+				"          date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 aggregate(groupBy(date,",
+				"          urlPath,",
+				"          datasetId,",
+				"          fileName),",
+				"     count = count()) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     filePattern:(concat('fileDownload-dataset-', $startDate, '-', $endDate, '.csv')),",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
