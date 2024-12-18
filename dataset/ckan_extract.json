@@ -6,10 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"startDate": {
-				"type": "string"
-			},
-			"endDate": {
+			"date": {
 				"type": "string"
 			}
 		},
@@ -19,7 +16,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat('ckan-', dataset().startDate, 'to', dataset().endDate, '.csv')",
+					"value": "@concat('ckan-', dataset().date, '.csv')",
 					"type": "Expression"
 				},
 				"folderPath": "extract",
