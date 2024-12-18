@@ -4,7 +4,7 @@
 		"annotations": [],
 		"type": "HttpServer",
 		"typeProperties": {
-			"url": "http://10.10.32.201/api/3/action",
+			"url": "http://ckan.agrimetrics.co.uk/api/3/action",
 			"enableServerCertificateValidation": false,
 			"authenticationType": "Anonymous"
 		}
