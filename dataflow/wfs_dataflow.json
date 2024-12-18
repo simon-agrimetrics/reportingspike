@@ -26,14 +26,14 @@
 					"name": "derivedColumn1"
 				},
 				{
-					"name": "select1"
-				},
-				{
 					"name": "aggregate1"
 				},
 				{
 					"name": "filter1",
 					"description": "filter URLs matching the pattern"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -49,18 +49,13 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> csvfile",
-				"csvfile derive(urlPath = regexExtract(message, `^.*GET (.*) HTTP.*$`, 1),",
+				"csvfile derive(url = regexExtract(message, `^.*GET (.*) HTTP.*$`, 1),",
 				"          date = toDate(timestamp, 'yyyy-M-dd')) ~> derivedColumn1",
-				"derivedColumn1 select(mapColumn(",
-				"          urlPath,",
-				"          date",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"filter1 aggregate(groupBy(date,",
+				"derivedColumn2 aggregate(groupBy(date,",
 				"          urlPath),",
 				"     count = count()) ~> aggregate1",
-				"select1 filter(regexMatch(urlPath, `^/spatialdata/.*/wfs[?]{1}.*$`)) ~> filter1",
+				"derivedColumn1 filter(regexMatch(url, `^/spatialdata/.*/wfs[?]{1}.*$`)) ~> filter1",
+				"filter1 derive(urlPath = regexExtract(url, `^(.*)[?]{1}.*$`, 1)) ~> derivedColumn2",
 				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     filePattern:(concat('wfs-', $startDate, '-', $endDate, '.csv')),",
