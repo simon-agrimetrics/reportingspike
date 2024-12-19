@@ -5,6 +5,8 @@
 			{
 				"name": "ckan_copy",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -13,16 +15,7 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": [
-					{
-						"name": "Source",
-						"value": "/filebeat-*/_search"
-					},
-					{
-						"name": "Destination",
-						"value": "report-data/dataset-view/@{pipeline().RunId}"
-					}
-				],
+				"userProperties": [],
 				"typeProperties": {
 					"source": {
 						"type": "JsonSource",
@@ -30,23 +23,11 @@
 							"type": "HttpReadSettings",
 							"requestMethod": "POST",
 							"additionalHeaders": "content-type: application/json",
-							"requestBody": "{\n    \"fq\": \"groups:defra_grp\",\n    \"rows\": 100,\n    \"start\": 0,\n    \"sort\": \"name_string desc\",\n    \"q\": \"AGM test\"\n}",
+							"requestBody": "{}",
 							"requestTimeout": ""
 						},
 						"formatSettings": {
 							"type": "JsonReadSettings"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings",
-							"copyBehavior": "FlattenHierarchy"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
 						}
 					},
 					"enableStaging": false,
@@ -104,25 +85,11 @@
 						"referenceName": "ckan_package_search",
 						"type": "DatasetReference"
 					}
-				],
-				"outputs": [
-					{
-						"referenceName": "ckan_extract",
-						"type": "DatasetReference",
-						"parameters": {
-							"date": {
-								"value": "@pipeline().parameters.date",
-								"type": "Expression"
-							}
-						}
-					}
 				]
 			},
 			{
 				"name": "ckan_dataflow",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "ckan_copy",
@@ -151,15 +118,6 @@
 							"endDate": {
 								"value": "'@{pipeline().parameters.endDate}'",
 								"type": "Expression"
-							}
-						},
-						"datasetParameters": {
-							"csvfile": {
-								"date": "@pipeline().parameters.startDate"
-							},
-							"sink1": {
-								"startDate": "@pipeline().parameters.startDate",
-								"endDate": "@pipeline().parameters.endDate"
 							}
 						}
 					},
