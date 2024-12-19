@@ -9,31 +9,19 @@
 						"referenceName": "ckan_extract",
 						"type": "DatasetReference"
 					},
-					"name": "csvfile"
+					"name": "apidump"
 				}
 			],
-			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "ckan_transform",
-						"type": "DatasetReference"
-					},
-					"name": "sink1"
-				}
-			],
+			"sinks": [],
 			"transformations": [
 				{
-					"name": "derivedColumn1"
+					"name": "flatten1"
 				},
 				{
-					"name": "aggregate1"
+					"name": "select1"
 				},
 				{
-					"name": "filter1",
-					"description": "filter URLs matching the pattern"
-				},
-				{
-					"name": "derivedColumn2"
+					"name": "derivedColumn4"
 				}
 			],
 			"scriptLines": [
@@ -42,28 +30,27 @@
 				"     endDate as string",
 				"}",
 				"source(output(",
-				"          message as string,",
-				"          tags as string,",
-				"          timestamp as string",
+				"          help as string,",
+				"          success as boolean,",
+				"          result as (count as integer, facets as ({} as string), results as (author as string, author_email as string, creator_user_id as string, id as string, isopen as boolean, license_id as string, license_title as string, maintainer as string, maintainer_email as string, metadata_created as string, metadata_modified as string, name as string, notes as string, num_resources as integer, num_tags as integer, organization as (id as string, name as string, title as string, type as string, description as string, image_url as string, created as string, is_organization as boolean, approval_status as string, state as string), owner_org as string, private as boolean, state as string, title as string, type as string, url as string, version as string, extras as (key as string, value as string)[], groups as (description as string, display_name as string, id as string, image_display_url as string, name as string, title as string)[], resources as (cache_last_updated as string, cache_url as string, created as string, datastore_active as boolean, description as string, format as string, hash as string, id as string, last_modified as string, metadata_modified as string, mimetype as string, mimetype_inner as string, name as string, package_id as string, position as integer, protocol as string, resource_type as string, size as string, state as string, url as string, url_type as string)[], tags as (display_name as string, id as string, name as string, state as string, vocabulary_id as string)[], relationships_as_subject as string[], relationships_as_object as string[])[], sort as string, search_facets as ({} as string))",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> csvfile",
-				"csvfile derive(url = regexExtract(message, `^.*GET (.*) HTTP.*$`, 1),",
-				"          date = toDate(timestamp, 'yyyy-M-dd')) ~> derivedColumn1",
-				"derivedColumn2 aggregate(groupBy(date,",
-				"          urlPath),",
-				"     count = count()) ~> aggregate1",
-				"derivedColumn1 filter(regexMatch(url, `^/spatialdata/.*ckan/features/v1.*$`)) ~> filter1",
-				"filter1 derive(urlPath = regexExtract(url, `^(.*/ckan/features/v1).*$`, 1)) ~> derivedColumn2",
-				"aggregate1 sink(allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     filePattern:(concat('ckan-', $startDate, '-', $endDate, '.csv')),",
-				"     umask: 0022,",
-				"     preCommands: [],",
-				"     postCommands: [],",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'arrayOfDocuments') ~> apidump",
+				"apidump foldDown(unroll(result.results, result.results),",
+				"     mapColumn(",
+				"          results = result.results",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten1",
+				"flatten1 select(mapColumn(",
+				"          id = results.id,",
+				"          resources = results.resources",
+				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(wfs = find(resources, regexMatch(#item.url, `^/spatialdata/.*/wfs[?]{1}.*$`))) ~> derivedColumn4"
 			]
 		}
 	}

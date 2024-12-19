@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "HttpServerLocation",
-				"relativeUrl": "/package_search"
+				"relativeUrl": "/api/3/action/package_search"
 			}
 		},
 		"schema": {}

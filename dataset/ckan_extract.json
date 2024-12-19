@@ -1,0 +1,296 @@
+{
+	"name": "ckan_extract",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "ckan-live.json",
+				"folderPath": "extract",
+				"fileSystem": "report-data"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"help": {
+					"type": "string"
+				},
+				"success": {
+					"type": "boolean"
+				},
+				"result": {
+					"type": "object",
+					"properties": {
+						"count": {
+							"type": "integer"
+						},
+						"facets": {
+							"type": "object"
+						},
+						"results": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"author": {
+										"type": "null"
+									},
+									"author_email": {
+										"type": "null"
+									},
+									"creator_user_id": {
+										"type": "string"
+									},
+									"id": {
+										"type": "string"
+									},
+									"isopen": {
+										"type": "boolean"
+									},
+									"license_id": {
+										"type": "null"
+									},
+									"license_title": {
+										"type": "null"
+									},
+									"maintainer": {
+										"type": "null"
+									},
+									"maintainer_email": {
+										"type": "null"
+									},
+									"metadata_created": {
+										"type": "string"
+									},
+									"metadata_modified": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									},
+									"notes": {
+										"type": "string"
+									},
+									"num_resources": {
+										"type": "integer"
+									},
+									"num_tags": {
+										"type": "integer"
+									},
+									"organization": {
+										"type": "object",
+										"properties": {
+											"id": {
+												"type": "string"
+											},
+											"name": {
+												"type": "string"
+											},
+											"title": {
+												"type": "string"
+											},
+											"type": {
+												"type": "string"
+											},
+											"description": {
+												"type": "string"
+											},
+											"image_url": {
+												"type": "string"
+											},
+											"created": {
+												"type": "string"
+											},
+											"is_organization": {
+												"type": "boolean"
+											},
+											"approval_status": {
+												"type": "string"
+											},
+											"state": {
+												"type": "string"
+											}
+										}
+									},
+									"owner_org": {
+										"type": "string"
+									},
+									"private": {
+										"type": "boolean"
+									},
+									"state": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									},
+									"type": {
+										"type": "string"
+									},
+									"url": {
+										"type": "null"
+									},
+									"version": {
+										"type": "null"
+									},
+									"extras": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"key": {
+													"type": "string"
+												},
+												"value": {
+													"type": "string"
+												}
+											}
+										}
+									},
+									"groups": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"description": {
+													"type": "string"
+												},
+												"display_name": {
+													"type": "string"
+												},
+												"id": {
+													"type": "string"
+												},
+												"image_display_url": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"title": {
+													"type": "string"
+												}
+											}
+										}
+									},
+									"resources": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"cache_last_updated": {
+													"type": "null"
+												},
+												"cache_url": {
+													"type": "null"
+												},
+												"created": {
+													"type": "string"
+												},
+												"datastore_active": {
+													"type": "boolean"
+												},
+												"description": {
+													"type": "string"
+												},
+												"format": {
+													"type": "string"
+												},
+												"hash": {
+													"type": "string"
+												},
+												"id": {
+													"type": "string"
+												},
+												"last_modified": {
+													"type": "null"
+												},
+												"metadata_modified": {
+													"type": "string"
+												},
+												"mimetype": {
+													"type": "null"
+												},
+												"mimetype_inner": {
+													"type": "null"
+												},
+												"name": {
+													"type": "string"
+												},
+												"package_id": {
+													"type": "string"
+												},
+												"position": {
+													"type": "integer"
+												},
+												"protocol": {
+													"type": "string"
+												},
+												"resource_type": {
+													"type": "null"
+												},
+												"size": {
+													"type": "null"
+												},
+												"state": {
+													"type": "string"
+												},
+												"url": {
+													"type": "string"
+												},
+												"url_type": {
+													"type": "null"
+												}
+											}
+										}
+									},
+									"tags": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"properties": {
+												"display_name": {
+													"type": "string"
+												},
+												"id": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"state": {
+													"type": "string"
+												},
+												"vocabulary_id": {
+													"type": "null"
+												}
+											}
+										}
+									},
+									"relationships_as_subject": {
+										"type": "array"
+									},
+									"relationships_as_object": {
+										"type": "array"
+									}
+								}
+							}
+						},
+						"sort": {
+							"type": "string"
+						},
+						"search_facets": {
+							"type": "object"
+						}
+					}
+				}
+			}
+		}
+	}
+}
