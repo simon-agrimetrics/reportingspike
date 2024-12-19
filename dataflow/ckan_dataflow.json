@@ -12,7 +12,15 @@
 					"name": "apidump"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ckan_transform",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "flatten1"
@@ -22,13 +30,12 @@
 				},
 				{
 					"name": "derivedColumn4"
+				},
+				{
+					"name": "derivedColumn5"
 				}
 			],
 			"scriptLines": [
-				"parameters{",
-				"     startDate as string,",
-				"     endDate as string",
-				"}",
 				"source(output(",
 				"          help as string,",
 				"          success as boolean,",
@@ -50,7 +57,17 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1 derive(wfs = find(resources, regexMatch(#item.url, `^/spatialdata/.*/wfs[?]{1}.*$`))) ~> derivedColumn4"
+				"derivedColumn5 derive(wfs = find(resource_urls, regexMatch(#item, `^/spatialdata/.*/wfs[?]{1}.*$`)),",
+				"          wms = find(resource_urls, regexMatch(#item, `^/spatialdata/.*/wms[?]{1}.*$`)),",
+				"          ogc = find(resource_urls, regexMatch(#item, `^/spatialdata/.*ogc/features/v1.*$`))) ~> derivedColumn4",
+				"select1 derive(resource_urls = split(dropLeft(toString(reduce(resources, '', #acc + ', ' + #item.url, #result)), 2), ',')) ~> derivedColumn5",
+				"derivedColumn4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
