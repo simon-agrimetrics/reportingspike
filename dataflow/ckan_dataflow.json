@@ -33,6 +33,12 @@
 				},
 				{
 					"name": "derivedColumn5"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "select3"
 				}
 			],
 			"scriptLines": [
@@ -57,12 +63,27 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"derivedColumn5 derive(wfs = find(resource_urls, regexMatch(#item, `^/spatialdata/.*/wfs[?]{1}.*$`)),",
+				"select2 derive(wfs = find(resource_urls, regexMatch(#item, `^/spatialdata/.*/wfs[?]{1}.*$`)),",
 				"          wms = find(resource_urls, regexMatch(#item, `^/spatialdata/.*/wms[?]{1}.*$`)),",
 				"          ogc = find(resource_urls, regexMatch(#item, `^/spatialdata/.*ogc/features/v1.*$`))) ~> derivedColumn4",
 				"select1 derive(resource_urls = split(dropLeft(toString(reduce(resources, '', #acc + ', ' + #item.url, #result)), 2), ',')) ~> derivedColumn5",
-				"derivedColumn4 sink(allowSchemaDrift: true,",
+				"derivedColumn5 select(mapColumn(",
+				"          id,",
+				"          resource_urls",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"derivedColumn4 select(mapColumn(",
+				"          id,",
+				"          wfs,",
+				"          wms,",
+				"          ogc",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     filePattern:'ckan-out.csv',",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
