@@ -109,17 +109,7 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "ckan_dataflow",
-						"type": "DataFlowReference",
-						"parameters": {
-							"startDate": {
-								"value": "'@{pipeline().parameters.startDate}'",
-								"type": "Expression"
-							},
-							"endDate": {
-								"value": "'@{pipeline().parameters.endDate}'",
-								"type": "Expression"
-							}
-						}
+						"type": "DataFlowReference"
 					},
 					"compute": {
 						"coreCount": 8,
