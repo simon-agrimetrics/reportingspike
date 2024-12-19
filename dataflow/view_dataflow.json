@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "explore_extract",
+						"referenceName": "view_extract",
 						"type": "DatasetReference"
 					},
 					"name": "csvfile"
@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "explore_transform",
+						"referenceName": "view_transform",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -30,6 +30,9 @@
 				},
 				{
 					"name": "aggregate1"
+				},
+				{
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
@@ -45,29 +48,27 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false) ~> csvfile",
-				"csvfile derive(datasetId = regexExtract(message, `^.*/explore/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}).*$`, 1),",
+				"csvfile derive(datasetId = regexExtract(message, `dataset\\/([a-fA-F0-9\\\\-]{36})(?!\\?)`, 1),",
 				"          urlPath = regexExtract(message, `^.*GET (.*) HTTP.*$`, 1),",
-				"          type = iif(regexMatch(message, `^.*/explore/.*?download=true.*$`), 'DOWNLOAD', ''),",
 				"          date = toDate(timestamp, 'yyyy-M-dd')) ~> derivedColumn1",
-				"derivedColumn1 select(mapColumn(",
+				"filter1 select(mapColumn(",
 				"          message,",
 				"          tags,",
 				"          timestamp,",
 				"          datasetId,",
 				"          urlPath,",
-				"          type,",
 				"          date",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"select1 aggregate(groupBy(date,",
 				"          urlPath,",
-				"          type,",
 				"          datasetId),",
 				"     count = count()) ~> aggregate1",
+				"derivedColumn1 filter(regexMatch(urlPath, `dataset\\/([a-fA-F0-9\\\\-]{36})(?!\\?)`)) ~> filter1",
 				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     filePattern:(concat('explore-dataset-', $startDate, '-', $endDate, '.csv')),",
+				"     filePattern:(concat('view-dataset-', $startDate, '-', $endDate, '.csv')),",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",

@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "view_extract",
+						"referenceName": "explore_extract",
 						"type": "DatasetReference"
 					},
 					"name": "csvfile"
@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "view_transform",
+						"referenceName": "explore_transform",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -67,7 +67,7 @@
 				"     count = count()) ~> aggregate1",
 				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     filePattern:(concat('view-dataset-', $startDate, '-', $endDate, '.csv')),",
+				"     filePattern:(concat('explore-dataset-', $startDate, '-', $endDate, '.csv')),",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
