@@ -39,6 +39,9 @@
 				},
 				{
 					"name": "select3"
+				},
+				{
+					"name": "derivedColumn6"
 				}
 			],
 			"scriptLines": [
@@ -63,9 +66,9 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select2 derive(wfs = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*/wfs$`)),",
-				"          wms = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*/wms$`)),",
-				"          ogc = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*ogc/features/v1.*$`))) ~> derivedColumn4",
+				"select2 derive(wfs_full = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*/wfs$`)),",
+				"          wms_full = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*/wms$`)),",
+				"          ogc_full = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*ogc/features/v1.*$`))) ~> derivedColumn4",
 				"select1 derive(resource_urls = split(dropLeft(toString(reduce(resources, '', #acc + ', ' + #item.url, #result)), 2), ',')) ~> derivedColumn5",
 				"derivedColumn5 select(mapColumn(",
 				"          id,",
@@ -73,14 +76,20 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"derivedColumn4 select(mapColumn(",
+				"derivedColumn6 select(mapColumn(",
 				"          id,",
 				"          wfs,",
 				"          wms,",
-				"          ogc",
+				"          ogc,",
+				"          wms_full,",
+				"          wfs_full,",
+				"          ogc_full",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
+				"derivedColumn4 derive(wms = regexExtract(wms_full, `^.*https://[^/]*(/.*)$`, 1),",
+				"          wfs = regexExtract(wfs_full, `^.*https://[^/]*(/.*)$`, 1),",
+				"          ogc = regexExtract(ogc_full, `^.*https://[^/]*(/.*)$`, 1)) ~> derivedColumn6",
 				"select3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     filePattern:'ckan-out.csv',",
