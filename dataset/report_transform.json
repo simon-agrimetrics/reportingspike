@@ -1,5 +1,5 @@
 {
-	"name": "wfs_transform",
+	"name": "report_transform",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
@@ -19,7 +19,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat('explore-dataset-', dataset().startDate, 'to', dataset().endDate, '.csv')",
+					"value": "report.csv",
 					"type": "Expression"
 				},
 				"folderPath": "transform",

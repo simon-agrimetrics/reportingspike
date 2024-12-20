@@ -17,7 +17,25 @@
 				"typeProperties": {
 					"dataflow": {
 						"referenceName": "report_dataflow",
-						"type": "DataFlowReference"
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"wms": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
+							},
+							"wfs": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
+							},
+							"ogc": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
+							},
+							"sink1": {
+								"startDate": "@pipeline().parameters.startDate",
+								"endDate": "@pipeline().parameters.endDate"
+							}
+						}
 					},
 					"compute": {
 						"coreCount": 8,
@@ -27,6 +45,14 @@
 				}
 			}
 		],
+		"parameters": {
+			"startDate": {
+				"type": "string"
+			},
+			"endDate": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }

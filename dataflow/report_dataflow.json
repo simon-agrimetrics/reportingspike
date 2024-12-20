@@ -17,27 +17,153 @@
 						"type": "DatasetReference"
 					},
 					"name": "wms"
+				},
+				{
+					"dataset": {
+						"referenceName": "wfs_transform",
+						"type": "DatasetReference"
+					},
+					"name": "wfs"
+				},
+				{
+					"dataset": {
+						"referenceName": "ogc_transform",
+						"type": "DatasetReference"
+					},
+					"name": "ogc"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "report_transform",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "join1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "join2"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "join3"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "filter1"
 				}
 			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          id as string,",
+				"          wfs as string,",
+				"          wms as string,",
+				"          ogc as string,",
+				"          wms_full as string,",
+				"          wfs_full as string,",
+				"          ogc_full as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     wildcardPaths:['transform/ckan-out*.csv']) ~> ckan",
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          date as date,",
+				"          urlPath as string,",
+				"          count as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> wms",
-				"ckan, wms join(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['/transform/wms*']) ~> wms",
+				"source(output(",
+				"          date as date,",
+				"          urlPath as string,",
+				"          count as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['/transform/wfs*']) ~> wfs",
+				"source(output(",
+				"          date as date,",
+				"          urlPath as string,",
+				"          count as short",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['/transform/ogc*']) ~> ogc",
+				"ckan, wfs join(wfs == urlPath,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> join1"
+				"     broadcast: 'auto')~> join1",
+				"join1 select(mapColumn(",
+				"          id,",
+				"          count,",
+				"          urlPath,",
+				"          wms,",
+				"          ogc",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1, wms join(wms == wms@urlPath,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join2",
+				"derivedColumn1 select(mapColumn(",
+				"          id,",
+				"          count,",
+				"          urlPath,",
+				"          ogc",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"join2 derive(urlPath = coalesce(wms@urlPath, select1@urlPath),",
+				"          count = coalesce(wms@count, select1@count)) ~> derivedColumn1",
+				"select2, ogc join(ogc == ogc@urlPath,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join3",
+				"join3 derive(urlPath = coalesce(ogc@urlPath, select2@urlPath),",
+				"          count = coalesce(ogc@count, select2@count)) ~> derivedColumn2",
+				"derivedColumn2 select(mapColumn(",
+				"          id,",
+				"          count,",
+				"          urlPath",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3 filter(!isNull(urlPath)) ~> filter1",
+				"filter1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     filePattern:'concat(\\'report-\\', $startDate, \\'-\\', $endDate, \\'.csv\\')',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
 			]
 		}
 	}
