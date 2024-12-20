@@ -1,5 +1,5 @@
 {
-	"name": "drl_transform",
+	"name": "ogc_transform",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
