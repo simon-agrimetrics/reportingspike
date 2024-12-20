@@ -1,5 +1,5 @@
 {
-	"name": "drl_transform",
+	"name": "drl_extract",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureDataLakeStorage1",
@@ -19,10 +19,10 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat('explore-dataset-', dataset().startDate, 'to', dataset().endDate, '.csv')",
+					"value": "@concat('drl-', dataset().startDate, 'to', dataset().endDate, '.csv')",
 					"type": "Expression"
 				},
-				"folderPath": "transform",
+				"folderPath": "extract",
 				"fileSystem": "report-data"
 			},
 			"columnDelimiter": ",",
@@ -30,7 +30,20 @@
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
-		"schema": []
+		"schema": [
+			{
+				"name": "message",
+				"type": "String"
+			},
+			{
+				"name": "tags",
+				"type": "String"
+			},
+			{
+				"name": "timestamp",
+				"type": "String"
+			}
+		]
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
 }
