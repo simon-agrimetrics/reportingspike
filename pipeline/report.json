@@ -18,6 +18,16 @@
 					"dataflow": {
 						"referenceName": "report_dataflow",
 						"type": "DataFlowReference",
+						"parameters": {
+							"startDate": {
+								"value": "'@{pipeline().parameters.startDate}'",
+								"type": "Expression"
+							},
+							"endDate": {
+								"value": "'@{pipeline().parameters.endDate}'",
+								"type": "Expression"
+							}
+						},
 						"datasetParameters": {
 							"wms": {
 								"startDate": "@pipeline().parameters.startDate",
