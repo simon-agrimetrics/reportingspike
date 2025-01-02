@@ -44,28 +44,34 @@
 			],
 			"transformations": [
 				{
-					"name": "join1"
+					"name": "unpivot1"
 				},
 				{
 					"name": "select1"
 				},
 				{
-					"name": "join2"
+					"name": "join1"
 				},
 				{
 					"name": "select2"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "join2"
+				},
+				{
+					"name": "select3"
 				},
 				{
 					"name": "join3"
 				},
 				{
-					"name": "derivedColumn2"
+					"name": "select4"
 				},
 				{
-					"name": "select3"
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select5"
 				},
 				{
 					"name": "filter1"
@@ -116,55 +122,85 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     wildcardPaths:['/transform/ogc*']) ~> ogc",
-				"ckan, wfs join(wfs == urlPath,",
+				"select1 unpivot(output(",
+				"          url as string,",
+				"          value as string",
+				"     ),",
+				"     ungroupBy(id),",
+				"     pivotValues: ['wfs', 'wms', 'ogc'],",
+				"     lateral: false,",
+				"     ignoreNullPivots: true) ~> unpivot1",
+				"ckan select(mapColumn(",
+				"          id,",
+				"          wfs,",
+				"          wms,",
+				"          ogc",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"unpivot1, wms join(value == urlPath,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join1",
 				"join1 select(mapColumn(",
 				"          id,",
-				"          count,",
-				"          urlPath,",
-				"          wms,",
-				"          ogc,",
-				"          date",
+				"          value,",
+				"          wms_date = date,",
+				"          wms_urlPath = urlPath,",
+				"          wms_count = count",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select1, wms join(wms == wms@urlPath,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2, wfs join(value == urlPath,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join2",
-				"derivedColumn1 select(mapColumn(",
+				"join2 select(mapColumn(",
 				"          id,",
-				"          date,",
-				"          count,",
-				"          urlPath,",
-				"          ogc",
+				"          value,",
+				"          wms_date,",
+				"          wms_urlPath,",
+				"          wms_count,",
+				"          wfs_date = date,",
+				"          wfs_urlPath = urlPath,",
+				"          wfs_count = count",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
-				"join2 derive(urlPath = coalesce(wms@urlPath, select1@urlPath),",
-				"          count = coalesce(wms@count, select1@count),",
-				"          date = coalesce(wms@date, select1@date)) ~> derivedColumn1",
-				"select2, ogc join(ogc == ogc@urlPath,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3, ogc join(value == urlPath,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> join3",
-				"join3 derive(urlPath = coalesce(ogc@urlPath, select2@urlPath),",
-				"          count = coalesce(ogc@count, select2@count),",
-				"          date = coalesce(ogc@date, select2@date)) ~> derivedColumn2",
-				"derivedColumn2 select(mapColumn(",
+				"join3 select(mapColumn(",
 				"          id,",
-				"          date,",
-				"          count,",
-				"          urlPath",
+				"          value,",
+				"          wms_date,",
+				"          wms_urlPath,",
+				"          wms_count,",
+				"          wfs_date,",
+				"          wfs_urlPath,",
+				"          wfs_count,",
+				"          ogc_date = date,",
+				"          ogc_urlPath = urlPath,",
+				"          ogc_count = count",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select3",
-				"select3 filter(!isNull(urlPath)) ~> filter1",
+				"     skipDuplicateMapOutputs: true) ~> select4",
+				"select4 derive(url = coalesce(coalesce(wfs_urlPath, wms_urlPath), ogc_urlPath),",
+				"          count = coalesce(coalesce(wfs_count, wms_count), ogc_count),",
+				"          date = coalesce(coalesce(wfs_date, wms_date), ogc_date)) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          id,",
+				"          url,",
+				"          count,",
+				"          date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select5",
+				"select5 filter(!isNull(url)) ~> filter1",
 				"filter1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     filePattern:(concat('report-', $startDate, '-', $endDate, '.csv')),",
