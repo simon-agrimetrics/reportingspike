@@ -19,7 +19,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat('explore-dataset-', dataset().startDate, 'to', dataset().endDate, '.csv')",
+					"value": "@concat('wfs-', dataset().startDate, '-', dataset().endDate, '-00001', '.csv')",
 					"type": "Expression"
 				},
 				"folderPath": "transform",
