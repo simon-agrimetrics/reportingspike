@@ -26,22 +26,32 @@
 					"name": "flatten1"
 				},
 				{
-					"name": "select1"
-				},
-				{
 					"name": "derivedColumn4"
 				},
 				{
 					"name": "derivedColumn5"
 				},
 				{
-					"name": "select2"
-				},
-				{
 					"name": "select3"
 				},
 				{
 					"name": "derivedColumn6"
+				},
+				{
+					"name": "flatten2"
+				},
+				{
+					"name": "pivot1"
+				},
+				{
+					"name": "MapDrifted1",
+					"description": "Creates an explicit mapping for each drifted column"
+				},
+				{
+					"name": "join1"
+				},
+				{
+					"name": "select4"
 				}
 			],
 			"scriptLines": [
@@ -56,40 +66,55 @@
 				"     documentForm: 'arrayOfDocuments') ~> apidump",
 				"apidump foldDown(unroll(result.results, result.results),",
 				"     mapColumn(",
-				"          results = result.results",
+				"          id = result.results.id,",
+				"          resources = result.results.resources,",
+				"          extras = result.results.extras",
 				"     ),",
 				"     skipDuplicateMapInputs: false,",
 				"     skipDuplicateMapOutputs: false) ~> flatten1",
-				"flatten1 select(mapColumn(",
-				"          id = results.id,",
-				"          resources = results.resources",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select1",
-				"select2 derive(wfs_full = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*/wfs$`)),",
+				"derivedColumn5 derive(wfs_full = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*/wfs$`)),",
 				"          wms_full = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*/wms$`)),",
 				"          ogc_full = find(resource_urls, regexMatch(#item, `^.*/spatialdata/.*ogc/features/v1.*$`))) ~> derivedColumn4",
-				"select1 derive(resource_urls = split(dropLeft(toString(reduce(resources, '', #acc + ', ' + #item.url, #result)), 2), ',')) ~> derivedColumn5",
-				"derivedColumn5 select(mapColumn(",
-				"          id,",
-				"          resource_urls",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select4 derive(resource_urls = split(dropLeft(toString(reduce({resources}, '', #acc + ', ' + #item.url, #result)), 2), ',')) ~> derivedColumn5",
 				"derivedColumn6 select(mapColumn(",
 				"          id,",
 				"          wfs,",
 				"          wms,",
 				"          ogc,",
-				"          wms_full,",
-				"          wfs_full,",
-				"          ogc_full",
+				"          fileDatasetId = dataSetId",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select3",
 				"derivedColumn4 derive(wms = regexExtract(wms_full, `^.*https://[^/]*(/.*)$`, 1),",
 				"          wfs = regexExtract(wfs_full, `^.*https://[^/]*(/.*)$`, 1),",
 				"          ogc = regexExtract(ogc_full, `^.*https://[^/]*(/.*)$`, 1)) ~> derivedColumn6",
+				"flatten1 foldDown(unroll(extras, extras),",
+				"     mapColumn(",
+				"          id,",
+				"          resources = resources,",
+				"          extras_key = extras.key,",
+				"          extras_value = extras.value",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flatten2",
+				"flatten2 pivot(groupBy(id),",
+				"     pivotBy(extras_key),",
+				"     {} = max(extras_value),",
+				"     columnNaming: '$N$V',",
+				"     lateral: false) ~> pivot1",
+				"pivot1 derive(dataSetId = toString(byName('dataSetId'))) ~> MapDrifted1",
+				"MapDrifted1, flatten2 join(pivot1@id == flatten2@id,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 select(mapColumn(",
+				"          id = pivot1@id,",
+				"          dataSetId,",
+				"          resources",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select4",
 				"select3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     filePattern:'ckan-out.csv',",
